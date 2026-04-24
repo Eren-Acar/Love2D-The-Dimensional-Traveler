@@ -1,0 +1,29 @@
+{
+  "Lua.diagnostics.globals": [
+    "love",
+    "Player",
+    "Enemy",
+    "Boss",
+    "Menu",
+    "Play",
+    "GameOver",
+    "HighScore",
+    "Pause",
+    "Win",
+    "WINDOW_WIDTH",
+    "WINDOW_HEIGHT",
+    "VIRTUAL_WIDTH",
+    "VIRTUAL_HEIGHT",
+    "gFonts",
+    "beginContact",
+    "endContact"
+  ],
+  "Lua.runtime.version": "LuaJIT",
+  "Lua.workspace.library": [
+    "${3rd}/love2d/library"
+    
+  ],
+  "Lua.workspace.checkThirdParty": false,
+  "Lua.diagnostics.disable": ["inject-field"]
+  
+}

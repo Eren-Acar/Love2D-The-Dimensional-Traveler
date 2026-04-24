@@ -24,6 +24,7 @@ end
 function Menu:loadScores()
     self.scores = {}
 
+    -- it stores on C:\Users\Eren Acar\AppData\Roaming\LOVE\DimensionalTraveler\
     if not love.filesystem.getInfo("leaderboard.txt") then
         return
     end
@@ -35,8 +36,10 @@ end
 
 function Menu:draw()
     love.graphics.draw(self.bg, 0, 0)
-    love.graphics.printf("THE DIMENSIONAL TRAVELER", 0, 120, love.graphics.getWidth(), "center")
+
     love.graphics.setFont(self.font)
+    love.graphics.printf("THE DIMENSIONAL TRAVELER", 0, 120, love.graphics.getWidth(), "center")
+    
     if self.mode == "menu" then
         for i, text in ipairs(self.buttons) do
             local y = 220 + i * 60
@@ -88,7 +91,7 @@ function Menu:keypressed(key)
         end
         self:playSelectSound()
 
-    elseif key == "return" or key == "kpenter" then
+    elseif key == "return" then
         self:playSelectSound()
 
         if self.selected == 1 then

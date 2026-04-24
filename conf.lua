@@ -1,6 +1,7 @@
 
 function love.conf(t)
-    t.title = "Platformer"                
+    t.title = "The Dimensional Traveler"       
+    t.identity = "dimensional-traveler"
     t.version = "11.3"                    
     t.console = true                     
     t.window.width = 1280                 

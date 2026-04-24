@@ -20,6 +20,5 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x, y, button)
-    local Gamestate = require("lib.hump.gamestate")
     Gamestate.mousepressed(x, y, button)
 end

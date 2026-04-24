@@ -18,7 +18,7 @@ function Map:load(levelNumber)
    self.completed = false
 
    World = love.physics.newWorld(0, 2000)
-   World:setCallbacks(beginContact, endContact)
+   -- World:setCallbacks(beginContact, endContact)
 
    self:init()
 end

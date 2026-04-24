@@ -27,6 +27,7 @@ function Win:saveScore()
         self.total
     )
 
+    -- it stores on C:\Users\Eren Acar\AppData\Roaming\LOVE\DimensionalTraveler\
     love.filesystem.append("leaderboard.txt", line .. "\n")
 end
 
@@ -45,7 +46,7 @@ end
 
 function Win:keypressed(key)
     if key == "m" then
-        Gamestate.switch("states.Menu")
+        Gamestate.switch(require("states.Menu"))
     end
 end
 

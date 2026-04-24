@@ -28,10 +28,12 @@ end
 function Play:enter(params)
     params = params or {}
 
-    self.music = love.audio.newSource("assets/sfx/Hydrogen.ogg", "stream")
-    self.music:setLooping(true)
-    self.music:setVolume(0.3)
-    self.music:play()
+    if self.music == nil then
+        self.music = love.audio.newSource("assets/sfx/Hydrogen.ogg", "stream")
+        self.music:setLooping(true)
+        self.music:setVolume(0.3)
+        self.music:play()
+    end
 
     self.timer = 0
 
@@ -101,7 +103,7 @@ function Play:update(dt)
     Enemy.updateAll(dt)
     GUI:update(dt)
     Camera:setPosition(Player.x, 0)
-    Map:update(dt)
+    Map:update()
 
     local newLevel = Map.currentLevel == 1 and self.bg_sets.level1 or self.bg_sets.level2
 
@@ -154,7 +156,7 @@ function Play:drawParallax()
     end
 
     for i = 1, total do
-        local speed = i / total  -- otomatik hız dağılımı
+        local speed = i / total
         drawLayer(layers[i], speed)
     end
 end
@@ -192,10 +194,6 @@ function Play:keypressed(key)
 
     if self.paused then
         return
-    end
-
-    if key == "j" then
-        Player:shoot()
     end
 
     Player:jump(key)

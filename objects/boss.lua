@@ -1,0 +1,258 @@
+local Boss = {}
+Boss.__index = Boss
+
+Boss.defeated = false
+
+local Player = require("objects.player")
+
+local ActiveBosses = {}
+
+local function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+   return x1 < x2 + w2 and
+          x2 < x1 + w1 and
+          y1 < y2 + h2 and
+          y2 < y1 + h1
+end
+
+local BossBullet = {}
+BossBullet.__index = BossBullet
+
+function BossBullet.new(x, y, dx, dy)
+   local self = setmetatable({}, BossBullet)
+   self.x = x
+   self.y = y
+   self.dx = dx
+   self.dy = dy
+   self.speed = 230
+   self.width = 12
+   self.height = 12
+   self.dead = false
+   return self
+end
+
+function BossBullet:update(dt)
+   self.x = self.x + self.dx * self.speed * dt
+   self.y = self.y + self.dy * self.speed * dt
+
+   if self.x < -100 or self.x > 5000 or self.y < -100 or self.y > 3000 then
+      self.dead = true
+   end
+end
+
+function BossBullet:draw()
+   love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
+end
+
+function BossBullet:getRect()
+   return self.x - self.width / 2,
+          self.y - self.height / 2,
+          self.width,
+          self.height
+end
+
+function Boss.removeAll()
+   ActiveBosses = {}
+end
+
+function Boss.new(x, y)
+   local instance = setmetatable({}, Boss)
+
+   instance.sprite = love.graphics.newImage("assets/boss2.png")
+
+   instance.x = x
+   instance.y = y
+   instance.startX = x
+   instance.startY = y
+
+   instance.width = 80
+   instance.height = 80
+
+   instance.health = 12
+   instance.maxHealth = 12
+   instance.phase = 1
+
+   instance.moveSpeed = 70
+   instance.yMin = y - 80
+   instance.yMax = y + 80
+   instance.directionY = 1
+
+   instance.shootTimer = 0
+   instance.shootCooldown = 1.4
+   instance.normalShootCooldown = 1.4
+   instance.phaseTwoShootCooldown = 0.7
+
+   instance.contactDamage = 1
+   instance.bulletDamage = 1
+   instance.bullets = {}
+
+   instance.color = {1, 1, 1, 1}
+
+   table.insert(ActiveBosses, instance)
+end
+
+function Boss:update(dt)
+   self:updatePhase()
+   self:move(dt)
+   self:updateShoot(dt)
+   self:updateBullets(dt)
+   self:checkPlayerBulletHits()
+   self:checkPlayerContact()
+end
+
+function Boss:updatePhase()
+   if self.health <= 6 then
+      self.phase = 2
+
+      self.contactDamage = 2
+      self.bulletDamage = 2
+
+      self.shootCooldown = self.phaseTwoShootCooldown
+      self.moveSpeed = 100
+   else
+      self.phase = 1
+
+      self.contactDamage = 1
+      self.bulletDamage = 1
+
+      self.shootCooldown = self.normalShootCooldown
+      self.moveSpeed = 70
+   end
+end
+
+function Boss:move(dt)
+   self.y = self.y + self.directionY * self.moveSpeed * dt
+
+   if self.y >= self.yMax then
+      self.y = self.yMax
+      self.directionY = -1
+   elseif self.y <= self.yMin then
+      self.y = self.yMin
+      self.directionY = 1
+   end
+end
+
+function Boss:updateShoot(dt)
+   self.shootTimer = self.shootTimer - dt
+
+   if self.shootTimer <= 0 then
+      self:shootTriple()
+      self.shootTimer = self.shootCooldown
+   end
+end
+
+function Boss:shootTriple()
+   local bulletStartX = self.x - self.width * 0.35
+   local bulletStartY = self.y - 8
+
+   table.insert(self.bullets, BossBullet.new(bulletStartX, bulletStartY, -1, 0))
+   table.insert(self.bullets, BossBullet.new(bulletStartX, bulletStartY, -1, -0.25))
+   table.insert(self.bullets, BossBullet.new(bulletStartX, bulletStartY, -1, 0.25))
+end
+
+function Boss:updateBullets(dt)
+   for i = #self.bullets, 1, -1 do
+      local bullet = self.bullets[i]
+      bullet:update(dt)
+
+      local bx, by, bw, bh = bullet:getRect()
+      local px = Player.x - Player.width / 2
+      local py = Player.y - Player.height / 2
+      local pw = Player.width
+      local ph = Player.height
+
+      if checkCollision(bx, by, bw, bh, px, py, pw, ph) then
+         Player:takeDamage(self.bulletDamage)
+         table.remove(self.bullets, i)
+      elseif bullet.dead then
+         table.remove(self.bullets, i)
+      end
+   end
+end
+
+function Boss:checkPlayerBulletHits()
+   for i = #Player.bullets, 1, -1 do
+      local bullet = Player.bullets[i]
+      local bx, by, bw, bh = bullet:getRect()
+
+      local bossX = self.x - self.width / 2
+      local bossY = self.y - self.height / 2
+
+      if checkCollision(bx, by, bw, bh, bossX, bossY, self.width, self.height) then
+         self.health = self.health - 1
+         table.remove(Player.bullets, i)
+
+         if self.health <= 0 then
+            self.dead = true
+            Boss.defeated = true
+            end
+            break
+         
+      end
+   end
+end
+
+function Boss:checkPlayerContact()
+   local bossX = self.x - self.width / 2
+   local bossY = self.y - self.height / 2
+
+   local px = Player.x - Player.width / 2
+   local py = Player.y - Player.height / 2
+   local pw = Player.width
+   local ph = Player.height
+
+   if checkCollision(bossX, bossY, self.width, self.height, px, py, pw, ph) then
+      Player:takeDamage(self.contactDamage)
+   end
+end
+
+function Boss:draw()
+   --love.graphics.setColor(0.7, 0.2, 0.2, 1)
+   --love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
+
+   love.graphics.setColor(1, 1, 1, 1)
+   
+   love.graphics.draw(
+        self.sprite,
+        self.x,
+        self.y,
+        0,
+        1,
+        1,
+        self.width / 2,
+        self.height / 2
+    )
+
+   for _, bullet in ipairs(self.bullets) do
+      bullet:draw()
+   end
+
+   love.graphics.setColor(1, 1, 1, 1)
+
+   local barWidth = 100
+   local barHeight = 10
+   local ratio = self.health / self.maxHealth
+
+   love.graphics.rectangle("line", self.x - barWidth / 2, self.y - self.height / 2 - 20, barWidth, barHeight)
+   love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - self.height / 2 - 20, barWidth * ratio, barHeight)
+end
+
+
+
+function Boss.updateAll(dt)
+   for i = #ActiveBosses, 1, -1 do
+      local boss = ActiveBosses[i]
+      boss:update(dt)
+
+      if boss.dead then
+         table.remove(ActiveBosses, i)
+      end
+   end
+end
+
+function Boss.drawAll()
+   for _, boss in ipairs(ActiveBosses) do
+      boss:draw()
+   end
+end
+
+return Boss

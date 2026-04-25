@@ -16,6 +16,12 @@ function Menu:enter()
     }
 
     self.scores = {}
+    self.leaderboardSelected = 1
+
+    self.leaderboardButtons = {
+        "Reset Leaderboard",
+        "Back to Menu"
+    }
 
     self.selectSound = love.audio.newSource("assets/sfx/menu.wav", "static")
     self.selectSound:setVolume(0.6)
@@ -24,14 +30,28 @@ end
 function Menu:loadScores()
     self.scores = {}
 
-    -- it stores on C:\Users\Eren Acar\AppData\Roaming\LOVE\DimensionalTraveler\
     if not love.filesystem.getInfo("leaderboard.txt") then
         return
     end
 
     for line in love.filesystem.lines("leaderboard.txt") do
-        table.insert(self.scores, line)
+        local time, coins = line:match("(%d+),(%d+)")
+
+        if time and coins then
+            table.insert(self.scores, {
+                time = tonumber(time),
+                coins = tonumber(coins)
+            })
+        end
     end
+
+    table.sort(self.scores, function(a, b)
+        if a.time == b.time then
+            return a.coins > b.coins
+        end
+
+        return a.time < b.time
+    end)
 end
 
 function Menu:draw()
@@ -53,6 +73,7 @@ function Menu:draw()
 
         love.graphics.printf("Use W/S and ENTER", 0, 600, love.graphics.getWidth(), "center")
 
+    
     elseif self.mode == "leaderboard" then
         love.graphics.printf("LEADERBOARD", 0, 200, love.graphics.getWidth(), "center")
 
@@ -60,20 +81,70 @@ function Menu:draw()
             love.graphics.printf("No scores yet.", 0, 260, love.graphics.getWidth(), "center")
         else
             for i, score in ipairs(self.scores) do
-                love.graphics.printf(score, 0, 240 + i * 35, love.graphics.getWidth(), "center")
+                local minutes = math.floor(score.time / 60)
+                local seconds = score.time % 60
+
+                local text = string.format(
+                    "%d) Time: %02d:%02d | Coins: %d",
+                    i,
+                    minutes,
+                    seconds,
+                    score.coins
+                )
+
+                love.graphics.printf(text, 0, 240 + i * 35, love.graphics.getWidth(), "center")
             end
         end
 
-        love.graphics.printf("Press ESC to return", 0, 520, love.graphics.getWidth(), "center")
+        for i, text in ipairs(self.leaderboardButtons) do
+            local y = 500 + i * 45
+            local displayText = text
+
+            if self.leaderboardSelected == i then
+                displayText = "> " .. text .. " <"
+            end
+
+            love.graphics.printf(displayText, 0, y, love.graphics.getWidth(), "center")
+        end
     end
 end
 
 function Menu:keypressed(key)
     if self.mode == "leaderboard" then
-        if key == "escape" then
+        if key == "w" or key == "up" then
+            self.leaderboardSelected = self.leaderboardSelected - 1
+
+            if self.leaderboardSelected < 1 then
+                self.leaderboardSelected = #self.leaderboardButtons
+            end
+
+            self:playSelectSound()
+
+        elseif key == "s" or key == "down" then
+            self.leaderboardSelected = self.leaderboardSelected + 1
+
+            if self.leaderboardSelected > #self.leaderboardButtons then
+                self.leaderboardSelected = 1
+            end
+
+            self:playSelectSound()
+
+        elseif key == "return" then
+            self:playSelectSound()
+
+            if self.leaderboardSelected == 1 then
+                love.filesystem.remove("leaderboard.txt")
+                self.scores = {}
+
+            elseif self.leaderboardSelected == 2 then
+                self.mode = "menu"
+            end
+
+        elseif key == "escape" then
             self.mode = "menu"
             self:playSelectSound()
         end
+
         return
     end
 

@@ -22,7 +22,7 @@ function Spike.new(x,y)
    instance.x = x
    instance.y = y
 
-   instance.damage = 1
+   instance.damage = 999
 
    instance.physics = {}
    instance.physics.body = love.physics.newBody(World, instance.x, instance.y, "static")

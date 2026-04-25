@@ -19,14 +19,30 @@ BossBullet.__index = BossBullet
 
 function BossBullet.new(x, y, dx, dy)
    local self = setmetatable({}, BossBullet)
+
+   self.frames = {
+      love.graphics.newImage("assets/fireball/1.png"),
+      love.graphics.newImage("assets/fireball/2.png"),
+      love.graphics.newImage("assets/fireball/3.png"),
+      love.graphics.newImage("assets/fireball/4.png"),
+      love.graphics.newImage("assets/fireball/5.png")
+   }
+
+   self.currentFrame = 1
+   self.animationTimer = 0
+   self.animationSpeed = 0.12
+
    self.x = x
    self.y = y
    self.dx = dx
    self.dy = dy
    self.speed = 230
-   self.width = 12
-   self.height = 12
+
+   self.width = 64
+   self.height = 32
+
    self.dead = false
+
    return self
 end
 
@@ -34,13 +50,42 @@ function BossBullet:update(dt)
    self.x = self.x + self.dx * self.speed * dt
    self.y = self.y + self.dy * self.speed * dt
 
+   self.animationTimer = self.animationTimer + dt
+
+   if self.animationTimer >= self.animationSpeed then
+      self.animationTimer = 0
+      self.currentFrame = self.currentFrame + 1
+
+      if self.currentFrame > #self.frames then
+         self.currentFrame = 1
+      end
+   end
+
    if self.x < -100 or self.x > 5000 or self.y < -100 or self.y > 3000 then
       self.dead = true
    end
 end
 
 function BossBullet:draw()
-   love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
+   local sprite = self.frames[self.currentFrame]
+
+   local scaleX = self.width / sprite:getWidth()
+   local scaleY = self.height / sprite:getHeight()
+
+   local angle = math.atan2(self.dy, self.dx)
+
+   love.graphics.setColor(1, 1, 1, 1)
+
+   love.graphics.draw(
+      sprite,
+      self.x,
+      self.y,
+      angle,
+      scaleX,
+      scaleY,
+      sprite:getWidth() / 2,
+      sprite:getHeight() / 2
+    )
 end
 
 function BossBullet:getRect()
@@ -52,6 +97,7 @@ end
 
 function Boss.removeAll()
    ActiveBosses = {}
+   Boss.defeated = false
 end
 
 function Boss.new(x, y)
@@ -85,7 +131,7 @@ function Boss.new(x, y)
    instance.bulletDamage = 1
    instance.bullets = {}
 
-   instance.color = {1, 1, 1, 1}
+   instance.dead = false
 
    table.insert(ActiveBosses, instance)
 end
@@ -102,18 +148,14 @@ end
 function Boss:updatePhase()
    if self.health <= 6 then
       self.phase = 2
-
       self.contactDamage = 2
       self.bulletDamage = 2
-
       self.shootCooldown = self.phaseTwoShootCooldown
       self.moveSpeed = 100
    else
       self.phase = 1
-
       self.contactDamage = 1
       self.bulletDamage = 1
-
       self.shootCooldown = self.normalShootCooldown
       self.moveSpeed = 70
    end
@@ -125,6 +167,7 @@ function Boss:move(dt)
    if self.y >= self.yMax then
       self.y = self.yMax
       self.directionY = -1
+
    elseif self.y <= self.yMin then
       self.y = self.yMin
       self.directionY = 1
@@ -152,9 +195,11 @@ end
 function Boss:updateBullets(dt)
    for i = #self.bullets, 1, -1 do
       local bullet = self.bullets[i]
+
       bullet:update(dt)
 
       local bx, by, bw, bh = bullet:getRect()
+
       local px = Player.x - Player.width / 2
       local py = Player.y - Player.height / 2
       local pw = Player.width
@@ -163,6 +208,7 @@ function Boss:updateBullets(dt)
       if checkCollision(bx, by, bw, bh, px, py, pw, ph) then
          Player:takeDamage(self.bulletDamage)
          table.remove(self.bullets, i)
+
       elseif bullet.dead then
          table.remove(self.bullets, i)
       end
@@ -184,9 +230,9 @@ function Boss:checkPlayerBulletHits()
          if self.health <= 0 then
             self.dead = true
             Boss.defeated = true
-            end
-            break
-         
+         end
+
+         break
       end
    end
 end
@@ -206,11 +252,8 @@ function Boss:checkPlayerContact()
 end
 
 function Boss:draw()
-   --love.graphics.setColor(0.7, 0.2, 0.2, 1)
-   --love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
-
    love.graphics.setColor(1, 1, 1, 1)
-   
+
    love.graphics.draw(
         self.sprite,
         self.x,
@@ -226,21 +269,22 @@ function Boss:draw()
       bullet:draw()
    end
 
-   love.graphics.setColor(1, 1, 1, 1)
-
    local barWidth = 100
    local barHeight = 10
    local ratio = self.health / self.maxHealth
 
+   love.graphics.setColor(1, 1, 1, 1)
    love.graphics.rectangle("line", self.x - barWidth / 2, self.y - self.height / 2 - 20, barWidth, barHeight)
+
    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - self.height / 2 - 20, barWidth * ratio, barHeight)
+
+   love.graphics.setColor(1, 1, 1, 1)
 end
-
-
 
 function Boss.updateAll(dt)
    for i = #ActiveBosses, 1, -1 do
       local boss = ActiveBosses[i]
+
       boss:update(dt)
 
       if boss.dead then

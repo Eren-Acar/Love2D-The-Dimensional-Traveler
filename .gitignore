@@ -40,4 +40,4 @@ luac.out
 *.hex
 
 # VS Code settings
-.vscode/
+.vscode

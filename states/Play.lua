@@ -133,12 +133,31 @@ function Play:draw()
     Camera:clear()
 
     GUI:draw()
+
+    if self.paused then
+        local Pause = require("states.Pause")
+        Pause:draw()
+    end
 end
 
 function Play:keypressed(key)
-    if key == "escape" then
+    if self.paused then
         local Pause = require("states.Pause")
-        Gamestate.switch(Pause)
+
+        if key == "escape" then
+            self.paused = false
+            return
+        end
+
+        Pause:keypressed(key, self)
+        return
+    end
+
+    if key == "escape" then
+        self.paused = true
+
+        local Pause = require("states.Pause")
+        Pause:enter()
         return
     end
 

@@ -41,13 +41,12 @@ function Pause:draw()
     end
 end
 
-function Pause:keypressed(key)
+function Pause:keypressed(key, play)
     if self.settingsMode then
         local result = Settings:keypressed(key)
 
         if result == "change" then
             Audio:updateVolumes()
-
         elseif result == "back" then
             self.settingsMode = false
         end
@@ -70,8 +69,10 @@ function Pause:keypressed(key)
         Audio:playSfx("assets/sfx/menu.wav")
 
     elseif key == "return" then
+        Audio:playSfx("assets/sfx/menu.wav")
+
         if self.selected == 1 then
-            Gamestate.switch(Play)
+            play.paused = false
 
         elseif self.selected == 2 then
             self.settingsMode = true
@@ -79,9 +80,6 @@ function Pause:keypressed(key)
         elseif self.selected == 3 then
             Gamestate.switch(Menu)
         end
-
-    elseif key == "escape" then
-        Gamestate.switch(Play)
     end
 end
 

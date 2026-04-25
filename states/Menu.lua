@@ -1,5 +1,6 @@
 local Gamestate = require("lib.hump.gamestate")
 local Play = require("states.Play")
+local Settings = require("objects.settings")
 
 local Menu = {}
 
@@ -12,7 +13,16 @@ function Menu:enter()
     self.buttons = {
         "New Game",
         "LeaderBoard",
+        "Settings",
         "Exit"
+    }
+
+    self.settingsSelected = 1
+
+    self.settingsButtons = {
+        "Music Volume",
+        "SFX Volume",
+        "Back to Menu"
     }
 
     self.scores = {}
@@ -106,6 +116,27 @@ function Menu:draw()
 
             love.graphics.printf(displayText, 0, y, love.graphics.getWidth(), "center")
         end
+    
+    elseif self.mode == "settings" then
+        love.graphics.printf("SETTINGS", 0, 200, love.graphics.getWidth(), "center")
+
+        local items = {
+            "Music Volume: " .. math.floor(Settings.musicVolume * 100) .. "%",
+            "SFX Volume: " .. math.floor(Settings.sfxVolume * 100) .. "%",
+            "Back to Menu"
+        }
+
+        for i, text in ipairs(items) do
+            local y = 260 + i * 55
+
+            if self.settingsSelected == i then
+                love.graphics.printf("> " .. text .. " <", 0, y, love.graphics.getWidth(), "center")
+            else
+                love.graphics.printf(text, 0, y, love.graphics.getWidth(), "center")
+            end
+        end
+
+        love.graphics.printf("W/S = Select | A/D = Change | ENTER = Choose", 0, 600, love.graphics.getWidth(), "center")    
     end
 end
 
@@ -148,6 +179,61 @@ function Menu:keypressed(key)
         return
     end
 
+    if self.mode == "settings" then
+        if key == "w" or key == "up" then
+            self.settingsSelected = self.settingsSelected - 1
+
+            if self.settingsSelected < 1 then
+                self.settingsSelected = #self.settingsButtons
+            end
+
+            self:playSelectSound()
+
+        elseif key == "s" or key == "down" then
+            self.settingsSelected = self.settingsSelected + 1
+
+            if self.settingsSelected > #self.settingsButtons then
+                self.settingsSelected = 1
+            end
+
+            self:playSelectSound()
+
+        elseif key == "a" or key == "left" then
+            if self.settingsSelected == 1 then
+                Settings.musicVolume = math.max(0, Settings.musicVolume - 0.1)
+            elseif self.settingsSelected == 2 then
+                Settings.sfxVolume = math.max(0, Settings.sfxVolume - 0.1)
+                self.selectSound:setVolume(Settings.sfxVolume)
+            end
+
+            self:playSelectSound()
+
+        elseif key == "d" or key == "right" then
+            if self.settingsSelected == 1 then
+                Settings.musicVolume = math.min(1, Settings.musicVolume + 0.1)
+            elseif self.settingsSelected == 2 then
+                Settings.sfxVolume = math.min(1, Settings.sfxVolume + 0.1)
+                self.selectSound:setVolume(Settings.sfxVolume)
+            end
+
+            self:playSelectSound()
+
+        elseif key == "return" then
+            if self.settingsSelected == 3 then
+                self.mode = "menu"
+            end
+
+            self:playSelectSound()
+
+        elseif key == "escape" then
+            self.mode = "menu"
+            self:playSelectSound()
+        end
+
+        return
+    end
+
+
     if key == "w" or key == "up" then
         self.selected = self.selected - 1
         if self.selected < 1 then
@@ -173,6 +259,9 @@ function Menu:keypressed(key)
             self.mode = "leaderboard"
 
         elseif self.selected == 3 then
+            self.mode = "settings"
+        
+        elseif self.selected == 4 then
             love.event.quit()
         end
     end

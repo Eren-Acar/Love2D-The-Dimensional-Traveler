@@ -8,6 +8,7 @@ local Camera = require("objects.camera")
 local Enemy = require("objects.enemy")
 local Map = require("objects.map")
 local Boss = require("objects.boss")
+local Settings = require("objects.settings")
 
 local GameOver = require("states.GameOver")
 local Win = require("states.Win")
@@ -31,7 +32,7 @@ function Play:enter(params)
     if self.music == nil then
         self.music = love.audio.newSource("assets/sfx/Hydrogen.ogg", "stream")
         self.music:setLooping(true)
-        self.music:setVolume(0.3)
+        self.music:setVolume(Settings.musicVolume)
         self.music:play()
     end
 
@@ -90,6 +91,10 @@ function Play:update(dt)
 
     self.timer = self.timer + dt
     GUI.time = self.timer
+
+    if self.music then
+        self.music:setVolume(Settings.musicVolume)
+    end
 
     World:update(dt)
 
@@ -188,11 +193,8 @@ end
 
 function Play:keypressed(key)
     if key == "escape" then
-        self.paused = not self.paused
-        return
-    end
-
-    if self.paused then
+        local Pause = require("states.Pause")
+        Gamestate.switch(Pause)
         return
     end
 

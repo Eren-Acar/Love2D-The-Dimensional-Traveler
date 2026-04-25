@@ -8,7 +8,7 @@ local Camera = require("objects.Camera")
 local Enemy = require("objects.Enemy")
 local Map = require("objects.Map")
 local Boss = require("objects.Boss")
-local Settings = require("objects.Settings")
+local Audio = require("objects.Audio")
 
 local GameOver = require("states.GameOver")
 local Win = require("states.Win")
@@ -30,10 +30,7 @@ function Play:enter(params)
     params = params or {}
 
     if self.music == nil then
-        self.music = love.audio.newSource("assets/sfx/Hydrogen.ogg", "stream")
-        self.music:setLooping(true)
-        self.music:setVolume(Settings.musicVolume)
-        self.music:play()
+        Audio:playMusic("assets/sfx/Hydrogen.ogg")
     end
 
     self.timer = 0
@@ -58,9 +55,7 @@ function Play:update(dt)
     self.timer = self.timer + dt
     GUI.time = self.timer
 
-    if self.music then
-        self.music:setVolume(Settings.musicVolume)
-    end
+    Audio:updateVolumes()
 
     World:update(dt)
 

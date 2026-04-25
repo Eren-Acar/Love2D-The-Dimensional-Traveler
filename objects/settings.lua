@@ -32,6 +32,10 @@ function Settings:draw()
     love.graphics.printf("W/S = Select | A/D = Change | ENTER = Choose", 0, 600, love.graphics.getWidth(), "center")
 end
 
+function Settings:apply()
+    love.audio.setVolume(self.musicVolume)
+end
+
 function Settings:keypressed(key)
     if key == "w" or key == "up" then
         self.selected = self.selected - 1
@@ -50,16 +54,20 @@ function Settings:keypressed(key)
     elseif key == "a" or key == "left" then
         if self.selected == 1 then
             self.musicVolume = math.max(0, self.musicVolume - 0.1)
+            self:apply()
         elseif self.selected == 2 then
             self.sfxVolume = math.max(0, self.sfxVolume - 0.1)
+            self:apply()
         end
         return "change"
 
     elseif key == "d" or key == "right" then
         if self.selected == 1 then
             self.musicVolume = math.min(1, self.musicVolume + 0.1)
+            self:apply()
         elseif self.selected == 2 then
             self.sfxVolume = math.min(1, self.sfxVolume + 0.1)
+            self:apply()
         end
         return "change"
 

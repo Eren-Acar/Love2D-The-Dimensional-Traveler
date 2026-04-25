@@ -2,6 +2,7 @@ local Gamestate = require("lib.hump.gamestate")
 local Play = require("states.Play")
 local Menu = require("states.Menu")
 local Settings = require("objects.Settings")
+local Audio = require("objects.Audio")
 
 local Pause = {}
 
@@ -21,7 +22,7 @@ end
 function Pause:draw()
     love.graphics.draw(self.bg, 0, 0)
 
-    love.graphics.printf("PAUSED", 0, 180, love.graphics.getWidth(), "center")
+    love.graphics.printf("PAUSED", 0, 140, love.graphics.getWidth(), "center")
 
     if not self.settingsMode then
         for i, text in ipairs(self.buttons) do
@@ -44,10 +45,13 @@ function Pause:keypressed(key)
     if self.settingsMode then
         local result = Settings:keypressed(key)
 
-        if result == "back" then
+        if result == "change" then
+            Audio:updateVolumes()
+
+        elseif result == "back" then
             self.settingsMode = false
         end
-        
+
         return
     end
 
@@ -56,12 +60,14 @@ function Pause:keypressed(key)
         if self.selected < 1 then
             self.selected = #self.buttons
         end
+        Audio:playSfx("assets/sfx/menu.wav")
 
     elseif key == "s" or key == "down" then
         self.selected = self.selected + 1
         if self.selected > #self.buttons then
             self.selected = 1
         end
+        Audio:playSfx("assets/sfx/menu.wav")
 
     elseif key == "return" then
         if self.selected == 1 then

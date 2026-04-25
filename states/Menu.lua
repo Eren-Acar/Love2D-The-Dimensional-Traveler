@@ -1,6 +1,7 @@
 local Gamestate = require("lib.hump.gamestate")
 local Play = require("states.Play")
 local Settings = require("objects.Settings")
+local Audio = require("objects.Audio")
 
 local Menu = {}
 
@@ -25,8 +26,6 @@ function Menu:enter()
         "Back to Menu"
     }
 
-    self.selectSound = love.audio.newSource("assets/sfx/menu.wav", "static")
-    self.selectSound:setVolume(0.6)
 end
 
 function Menu:loadScores()
@@ -160,8 +159,11 @@ function Menu:keypressed(key)
             self.mode = "menu"
         end
 
+        if result == "change" then
+            Audio:updateVolumes()
+        end
+
         if result then
-            self.selectSound:setVolume(Settings.sfxVolume)
             self:playSelectSound()
         end
 
@@ -203,10 +205,7 @@ function Menu:keypressed(key)
 end
 
 function Menu:playSelectSound()
-    if self.selectSound then
-        self.selectSound:stop()
-        self.selectSound:play()
-    end
+    Audio:playSfx("assets/sfx/menu.wav")
 end
 
 return Menu

@@ -6,6 +6,7 @@ local Settings = require("objects.Settings")
 local Pause = {}
 
 function Pause:enter()
+    self.bg = love.graphics.newImage("assets/backgrounds/background.png")
     self.selected = 1
 
     self.buttons = {
@@ -18,6 +19,8 @@ function Pause:enter()
 end
 
 function Pause:draw()
+    love.graphics.draw(self.bg, 0, 0)
+
     love.graphics.printf("PAUSED", 0, 180, love.graphics.getWidth(), "center")
 
     if not self.settingsMode then

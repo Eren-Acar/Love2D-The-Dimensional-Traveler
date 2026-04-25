@@ -3,7 +3,7 @@ local Map = {}
 local STI = require("lib.sti.init")
 local Coin = require("objects.Coin")
 local Spike = require("objects.spike")
-
+local Camera = require("objects.Camera")
 local Enemy = require("objects.Enemy")
 local Player = require("objects.Player")
 local Boss = require("objects.Boss")
@@ -18,7 +18,6 @@ function Map:load(levelNumber)
    self.completed = false
 
    World = love.physics.newWorld(0, 2000)
-   -- World:setCallbacks(beginContact, endContact)
 
    self:init()
 end
@@ -35,7 +34,66 @@ function Map:init()
    self.entityLayer.visible = false
    MapWidth = self.groundLayer.width * 16
 
+   self:loadBackground()
    self:spawnEntities()
+end
+
+function Map:loadBackground()
+   if self.currentLevel == 1 then
+      self.backgroundLayers = {
+         love.graphics.newImage("assets/backgrounds/forest/BACKGROUND.png"),
+         love.graphics.newImage("assets/backgrounds/forest/WOODS - First.png"),
+         love.graphics.newImage("assets/backgrounds/forest/WOODS - Second.png"),
+         love.graphics.newImage("assets/backgrounds/forest/VINES - Second.png"),
+         love.graphics.newImage("assets/backgrounds/forest/WOODS - Third.png"),
+         love.graphics.newImage("assets/backgrounds/forest/WOODS - Fourth.png"),
+         love.graphics.newImage("assets/backgrounds/forest/BUSH - BACKGROUND.png")
+      }
+   else
+      self.backgroundLayers = {
+         love.graphics.newImage("assets/backgrounds/cave/cave7.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave0.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave1.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave2.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave3.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave4.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave5.png"),
+         love.graphics.newImage("assets/backgrounds/cave/cave6.png")
+      }
+   end
+end
+
+function Map:drawParallax()
+   local camX = Camera.x
+   local screenW = love.graphics.getWidth()
+   local screenH = love.graphics.getHeight()
+
+   local layers = self.backgroundLayers
+   local total = #layers
+
+   local function drawLayer(img, speed)
+      local scale = math.max(
+         screenW / img:getWidth(),
+         screenH / img:getHeight()
+      )
+
+      local imgW = img:getWidth() * scale
+      local x = -(camX * speed) % imgW
+
+      love.graphics.draw(img, x, 0, 0, scale, scale)
+      love.graphics.draw(img, x - imgW, 0, 0, scale, scale)
+      love.graphics.draw(img, x + imgW, 0, 0, scale, scale)
+   end
+
+   for i = 1, total do
+      local speed = i / total
+      drawLayer(layers[i], speed)
+   end
+end
+
+function Map:draw()
+   self:drawParallax()
+   self.level:draw(-Camera.x, -Camera.y, Camera.scale, Camera.scale)
 end
 
 function Map:next()

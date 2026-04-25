@@ -38,36 +38,6 @@ function Play:enter(params)
 
     self.timer = 0
 
-    self.bg_sets = {
-    level1 = {
-        love.graphics.newImage("assets/backgrounds/forest/BACKGROUND.png"),
-        love.graphics.newImage("assets/backgrounds/forest/WOODS - First.png"),
-        love.graphics.newImage("assets/backgrounds/forest/WOODS - Second.png"),
-        love.graphics.newImage("assets/backgrounds/forest/VINES - Second.png"),
-        love.graphics.newImage("assets/backgrounds/forest/WOODS - Third.png"),
-        love.graphics.newImage("assets/backgrounds/forest/WOODS - Fourth.png"),
-        love.graphics.newImage("assets/backgrounds/forest/BUSH - BACKGROUND.png")
-    },
-
-    level2 = {
-        love.graphics.newImage("assets/backgrounds/cave/cave7.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave0.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave1.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave2.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave3.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave4.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave5.png"),
-        love.graphics.newImage("assets/backgrounds/cave/cave6.png"),
-        
-    }
-}
-
-    if Map.currentLevel == 1 then
-        self.currentBG = self.bg_sets.level1
-    else
-        self.currentBG = self.bg_sets.level2
-    end
-
     Enemy.loadAssets()
     Map:load(params.level)
 
@@ -105,12 +75,6 @@ function Play:update(dt)
     GUI:update(dt)
     Camera:setPosition(Player.x, 0)
     Map:update()
-
-    local newLevel = Map.currentLevel == 1 and self.bg_sets.level1 or self.bg_sets.level2
-
-    if self.currentBG ~= newLevel then
-        self.currentBG = newLevel
-    end
 
     if Player.dead and not self.gameEnded then
         self.gameEnded = true
@@ -163,9 +127,7 @@ function Play:drawParallax()
 end
 
 function Play:draw()
-    self:drawParallax()
-
-    Map.level:draw(-Camera.x, -Camera.y, Camera.scale, Camera.scale)
+    Map:draw()
 
     Camera:apply()
     Player:draw()
@@ -173,11 +135,9 @@ function Play:draw()
     Boss.drawAll()
     Coin.drawAll()
     Spike.drawAll()
-
     Camera:clear()
 
     GUI:draw()
-
 end
 
 function Play:keypressed(key)

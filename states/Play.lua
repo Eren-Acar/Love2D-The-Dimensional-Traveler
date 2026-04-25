@@ -85,10 +85,6 @@ function Play:update(dt)
         return
     end
 
-    if self.paused then
-        return
-    end
-
     self.timer = self.timer + dt
     GUI.time = self.timer
 
@@ -182,13 +178,6 @@ function Play:draw()
 
     GUI:draw()
 
-    if self.paused then
-        love.graphics.setColor(0, 0, 0, 0.4)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf("PAUSED", 0, 220, love.graphics.getWidth(), "center")
-        love.graphics.printf("Press ESC to continue", 0, 260, love.graphics.getWidth(), "center")
-    end
 end
 
 function Play:keypressed(key)

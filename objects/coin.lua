@@ -34,7 +34,6 @@ function Coin:remove()
          collectSound:play()
 
          Player:incrementCoins()
-         print(Player.coins)
 
          self.physics.body:destroy()
          table.remove(ActiveCoins, i)

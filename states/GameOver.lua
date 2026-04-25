@@ -25,8 +25,17 @@ function GameOver:keypressed(key)
     if key == "r" then
         local Play = require("states.Play")
 
+        local restartTime = 0
+        local restartCoins = 0
+
+        if self.level == 2 then
+            restartTime = self.time
+        end
+
         Gamestate.switch(Play, {
-            level = self.level
+            level = self.level,
+            time = restartTime,
+            coins = restartCoins
         })
 
     elseif key == "m" then

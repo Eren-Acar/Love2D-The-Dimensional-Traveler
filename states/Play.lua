@@ -33,7 +33,7 @@ function Play:enter(params)
         Audio:playMusic("assets/sfx/Hydrogen.ogg")
     end
 
-    self.timer = 0
+    self.timer = params.time or 0
 
     Enemy.loadAssets()
     Map:load(params.level)
@@ -45,6 +45,7 @@ function Play:enter(params)
 
     GUI:load()
     Player:load()
+    Player.coins = params.coins or 0
 end
 
 function Play:update(dt)

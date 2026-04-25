@@ -3,7 +3,7 @@ Boss.__index = Boss
 
 Boss.defeated = false
 
-local Player = require("objects.player")
+local Player = require("objects.Player")
 
 local ActiveBosses = {}
 

@@ -3,7 +3,7 @@
 local Coin = {}
 Coin.__index = Coin
 local ActiveCoins = {}
-local Player = require("objects.player")
+local Player = require("objects.Player")
 
 local collectSound = love.audio.newSource("assets/sfx/get_coin.ogg", "static")
 collectSound:setVolume(0.6)

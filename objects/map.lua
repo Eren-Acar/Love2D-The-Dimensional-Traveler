@@ -1,12 +1,12 @@
 
 local Map = {}
 local STI = require("lib.sti.init")
-local Coin = require("objects.coin")
+local Coin = require("objects.Coin")
 local Spike = require("objects.spike")
 
-local Enemy = require("objects.enemy")
-local Player = require("objects.player")
-local Boss = require("objects.boss")
+local Enemy = require("objects.Enemy")
+local Player = require("objects.Player")
+local Boss = require("objects.Boss")
 
 function Map:load(levelNumber)
    Coin.removeAll()

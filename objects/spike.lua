@@ -7,7 +7,7 @@ Spike.width = Spike.img:getWidth()
 Spike.height = Spike.img:getHeight()
 
 local ActiveSpikes = {}
-local Player = require("objects.player")
+local Player = require("objects.Player")
 
 function Spike.removeAll()
    for i,v in ipairs(ActiveSpikes) do

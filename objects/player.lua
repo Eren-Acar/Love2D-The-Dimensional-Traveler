@@ -1,5 +1,5 @@
 local Player = {}
-local Bullet = require("objects.bullet")
+local Bullet = require("objects.Bullet")
 
 function Player:load()
    self.x = 100

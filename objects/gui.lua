@@ -1,7 +1,7 @@
 
 
 local GUI = {}
-local Player = require("objects.player")
+local Player = require("objects.Player")
 
 function GUI:load()
    self.coins = {}

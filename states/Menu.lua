@@ -1,6 +1,6 @@
 local Gamestate = require("lib.hump.gamestate")
 local Play = require("states.Play")
-local Settings = require("objects.settings")
+local Settings = require("objects.Settings")
 
 local Menu = {}
 

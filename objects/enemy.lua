@@ -27,16 +27,13 @@ function Enemy.new(x, y)
 
    instance.x = x
    instance.y = y
+   instance.fixedY = y
    instance.offsetY = -8
    instance.r = 0
 
    instance.speed = 100
    instance.speedMod = 1
    instance.xVel = instance.speed
-
-   instance.minX = 1105
-   instance.maxX = 1419
-   instance.fixedY = y
 
    instance.rageCounter = 0
    instance.rageTrigger = 3
@@ -52,11 +49,20 @@ function Enemy.new(x, y)
    instance.animation.walk = { total = 4, current = 1, img = Enemy.walkAnim }
    instance.animation.draw = instance.animation.walk.img[1]
 
+   instance.width = Enemy.width
+   instance.height = Enemy.height
+
    instance.physics = {}
    instance.physics.body = love.physics.newBody(World, instance.x, instance.y, "dynamic")
    instance.physics.body:setFixedRotation(true)
-   instance.physics.shape = love.physics.newRectangleShape(instance.width * 0.4, instance.height * 0.75)
+
+   instance.physics.shape = love.physics.newRectangleShape(
+      instance.width * 0.4,
+      instance.height * 0.75
+   )
+
    instance.physics.fixture = love.physics.newFixture(instance.physics.body, instance.physics.shape)
+   instance.physics.fixture:setUserData("enemy")
    instance.physics.body:setMass(25)
 
    table.insert(ActiveEnemies, instance)
@@ -83,7 +89,6 @@ function Enemy:update(dt)
    end
 
    self:syncPhysics()
-   self:checkBounds()
    self:animate(dt)
 end
 
@@ -102,14 +107,6 @@ end
 
 function Enemy:flipDirection()
    self.xVel = -self.xVel
-end
-
-function Enemy:checkBounds()
-   if self.x >= self.maxX and self.xVel > 0 then
-      self:flipDirection()
-   elseif self.x <= self.minX and self.xVel < 0 then
-      self:flipDirection()
-   end
 end
 
 function Enemy:takeDamage(amount)
@@ -147,9 +144,10 @@ end
 
 function Enemy:syncPhysics()
    local x, _ = self.physics.body:getPosition()
-   self.physics.body:setPosition(x, self.fixedY)
 
+   self.physics.body:setPosition(x, self.fixedY)
    self.x, self.y = self.physics.body:getPosition()
+
    self.physics.body:setLinearVelocity(self.xVel * self.speedMod, 0)
 end
 
@@ -159,6 +157,7 @@ function Enemy:draw()
    end
 
    local scaleX = 1
+
    if self.xVel < 0 then
       scaleX = -1
    end
@@ -176,14 +175,14 @@ function Enemy:draw()
 end
 
 function Enemy.updateAll(dt)
-   for _, instance in ipairs(ActiveEnemies) do
-      instance:update(dt)
+   for _, enemy in ipairs(ActiveEnemies) do
+      enemy:update(dt)
    end
 end
 
 function Enemy.drawAll()
-   for _, instance in ipairs(ActiveEnemies) do
-      instance:draw()
+   for _, enemy in ipairs(ActiveEnemies) do
+      enemy:draw()
    end
 end
 
@@ -224,14 +223,40 @@ function Enemy.checkBulletHits(bullets)
    Enemy.cleanupDead()
 end
 
+function Enemy.hasAlive()
+   for _, enemy in ipairs(ActiveEnemies) do
+      if not enemy.dead then
+         return true
+      end
+   end
+
+   return false
+end
+
 function Enemy.beginContact(a, b, collision)
-   for _, instance in ipairs(ActiveEnemies) do
-      if not instance.dead and (a == instance.physics.fixture or b == instance.physics.fixture) then
-         if a == Player.physics.fixture or b == Player.physics.fixture then
-            Player:takeDamage(instance.damage)
+   for _, enemy in ipairs(ActiveEnemies) do
+      if not enemy.dead and (a == enemy.physics.fixture or b == enemy.physics.fixture) then
+         local other = a
+
+         if a == enemy.physics.fixture then
+            other = b
          end
 
-         instance:incrementRage()
+         if other == Player.physics.fixture then
+            Player:takeDamage(enemy.damage)
+            enemy:incrementRage()
+         end
+
+         if other:getUserData() == "enemy_collider" then
+            enemy:flipDirection()
+
+            local pushX = 4
+
+            if enemy.xVel < 0 then
+               pushX = -4
+            end
+
+         end
       end
    end
 end

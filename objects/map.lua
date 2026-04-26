@@ -33,6 +33,7 @@ function Map:init()
    self.solidLayer.visible = false
    self.entityLayer.visible = false
    MapWidth = self.groundLayer.width * 16
+   MapHeight = self.groundLayer.height * 16
 
    self:loadBackground()
    self:spawnEntities()
@@ -126,6 +127,13 @@ function Map:spawnEntities()
 
 		elseif v.type == "enemy" then
 			Enemy.new(v.x + v.width / 2, v.y + v.height / 2)
+      
+      elseif v.type == "enemy_collider" then
+         local body = love.physics.newBody(World, v.x + v.width / 2, v.y + v.height / 2, "static")
+         local shape = love.physics.newRectangleShape(v.width, v.height)
+         local fixture = love.physics.newFixture(body, shape)
+
+         fixture:setUserData("enemy_collider")
 
 		elseif v.type == "boss" and self.currentLevel == 2 then
 			Boss.new(v.x + v.width / 2, v.y + v.height / 2)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="120" height="36" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="869">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="120" height="36" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="870">
  <editorsettings>
   <export target="../1.lua" format="lua"/>
  </editorsettings>
@@ -250,6 +250,9 @@
    <ellipse/>
   </object>
   <object id="867" name="Coin" type="coin" x="1616" y="472.667">
+   <ellipse/>
+  </object>
+  <object id="869" name="Coin" type="coin" x="411.333" y="430.667">
    <ellipse/>
   </object>
  </objectgroup>

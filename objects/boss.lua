@@ -123,9 +123,9 @@ function Boss.new(x, y)
    instance.directionY = 1
 
    instance.shootTimer = 0
-   instance.shootCooldown = 1.4
-   instance.normalShootCooldown = 1.4
-   instance.phaseTwoShootCooldown = 0.7
+   instance.shootCooldown = 2
+   instance.normalShootCooldown = 2
+   instance.phaseTwoShootCooldown = 1
 
    instance.contactDamage = 1
    instance.bulletDamage = 1

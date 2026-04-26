@@ -16,7 +16,8 @@
     "VIRTUAL_HEIGHT",
     "gFonts",
     "beginContact",
-    "endContact"
+    "endContact",
+    "anim.total"
   ],
   "Lua.runtime.version": "LuaJIT",
   "Lua.workspace.library": [

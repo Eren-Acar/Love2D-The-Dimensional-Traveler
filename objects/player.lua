@@ -10,6 +10,10 @@ function Player:load()
    self.width = 20
    self.height = 60
 
+   self.standHeight = 60
+   self.crouchHeight = 30
+   self.isCrouching = false
+
    self.xVel = 0
    self.yVel = 0
    self.maxSpeed = 200
@@ -85,6 +89,8 @@ function Player:loadAssets()
       self.animation.shoot.img[i] = love.graphics.newImage("assets/player/shoot/" .. i .. ".png")
    end
 
+   self.animation.crouch = { total = 1, current = 1, img = {love.graphics.newImage("assets/player/crouch.png")} }
+
    self.animation.draw = self.animation.idle.img[1]
    self.animation.width = self.animation.draw:getWidth()
    self.animation.height = self.animation.draw:getHeight()
@@ -128,6 +134,7 @@ function Player:update(dt)
    end
 
    self:unTint(dt)
+   self:updateCrouch()
    self:setState()
    self:setDirection()
    self:animate(dt)
@@ -166,7 +173,9 @@ function Player:unTint(dt)
 end
 
 function Player:setState()
-   if self.isShooting then
+   if self.isCrouching then
+      self.state = "crouch"
+   elseif self.isShooting then
       self.state = "shoot"
    elseif not self.grounded then
       self.state = "air"
@@ -236,7 +245,46 @@ function Player:applyGravity(dt)
    end
 end
 
+function Player:updateCrouch()
+   local wantsCrouch = love.keyboard.isDown("s", "down")
+
+   if wantsCrouch and not self.isCrouching then
+      self:startCrouch()
+
+   elseif not wantsCrouch and self.isCrouching then
+      self:stopCrouch()
+   end
+end
+
+function Player:startCrouch()
+   self.isCrouching = true
+   self.height = self.crouchHeight
+
+   self.physics.fixture:destroy()
+   self.physics.shape = love.physics.newRectangleShape(self.width, self.height)
+   self.physics.fixture = love.physics.newFixture(self.physics.body, self.physics.shape)
+
+   self.y = self.y + self.standHeight / 4
+   self.physics.body:setPosition(self.x, self.y)
+end
+
+function Player:stopCrouch()
+   self.isCrouching = false
+   self.height = self.standHeight
+
+   self.physics.fixture:destroy()
+   self.physics.shape = love.physics.newRectangleShape(self.width, self.height)
+   self.physics.fixture = love.physics.newFixture(self.physics.body, self.physics.shape)
+
+   self.y = self.y - self.standHeight / 4
+   self.physics.body:setPosition(self.x, self.y)
+end
+
 function Player:move(dt)
+   if self.isCrouching then
+      self.xVel = 0
+      return
+   end
    if love.keyboard.isDown("d", "right") then
       self.xVel = math.min(self.xVel + self.acceleration * dt, self.maxSpeed)
    elseif love.keyboard.isDown("a", "left") then
@@ -290,6 +338,10 @@ function Player:land(collision)
 end
 
 function Player:jump(key)
+   if self.isCrouching then
+      return
+   end
+
    if key == "w" or key == "up" then
       if self.grounded or self.graceTime > 0 then
          self.yVel = self.jumpAmount

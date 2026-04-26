@@ -7,11 +7,13 @@ local Camera = require("objects.Camera")
 local Enemy = require("objects.Enemy")
 local Player = require("objects.Player")
 local Boss = require("objects.Boss")
+local DeadZone = require("objects.DeadZone")
 
 function Map:load(levelNumber)
    Coin.removeAll()
    Enemy.removeAll()
    Boss.removeAll()
+   DeadZone.removeAll()
    Spike.removeAll()
 
    self.currentLevel = levelNumber or 1
@@ -110,6 +112,7 @@ function Map:clean()
    Coin.removeAll()
    Enemy.removeAll()
    Boss.removeAll()
+   DeadZone.removeAll()
 
    Spike.removeAll()
 end
@@ -124,6 +127,9 @@ function Map:spawnEntities()
 	for i, v in ipairs(self.entityLayer.objects) do
 		if v.type == "spikes" then
 			Spike.new(v.x + v.width / 2, v.y + v.height / 2)
+      
+      elseif v.type == "deadzone" then
+         DeadZone.new(v.x, v.y, v.width, v.height)
 
 		elseif v.type == "enemy" then
 			Enemy.new(v.x + v.width / 2, v.y + v.height / 2)

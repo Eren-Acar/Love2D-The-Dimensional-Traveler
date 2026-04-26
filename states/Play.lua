@@ -9,6 +9,7 @@ local Enemy = require("objects.Enemy")
 local Map = require("objects.Map")
 local Boss = require("objects.Boss")
 local Audio = require("objects.Audio")
+local DeadZone = require("objects.DeadZone")
 
 local GameOver = require("states.GameOver")
 local Win = require("states.Win")
@@ -18,6 +19,7 @@ local Play = {}
 local function beginContact(a, b, collision)
     if Coin.beginContact(a, b, collision) then return end
     if Spike.beginContact(a, b, collision) then return end
+    if DeadZone.beginContact(a, b, collision) then return end
     Enemy.beginContact(a, b, collision)
     Player:beginContact(a, b, collision)
 end
@@ -46,6 +48,8 @@ function Play:enter(params)
     GUI:load()
     Player:load()
     Player.coins = params.coins or 0
+
+    self.font = love.graphics.newFont("assets/bit.ttf", 16)
 end
 
 function Play:update(dt)
@@ -66,6 +70,7 @@ function Play:update(dt)
 
     Coin.updateAll(dt)
     Spike.updateAll(dt)
+    DeadZone.updateAll(dt)
 
     Enemy.updateAll(dt)
     GUI:update(dt)
@@ -126,6 +131,16 @@ function Play:draw()
     Map:draw()
 
     Camera:apply()
+
+    if Map.currentLevel == 1 then
+        love.graphics.setFont(self.font)
+        love.graphics.print(
+            "A / D - Move   \nW - Jump   S - Crouch   \nRight Click - Shoot\nBEAT THE BOSS!!!",
+            170,
+            141.6
+        )
+    end
+    
     Player:draw()
     Enemy.drawAll()
     Boss.drawAll()

@@ -41,6 +41,7 @@ function Enemy.new(x, y)
    instance.damage = 1
    instance.health = 3
    instance.dead = false
+   instance.dying = false
 
    instance.state = "walk"
 
@@ -48,6 +49,7 @@ function Enemy.new(x, y)
    instance.animation.run = { total = 4, current = 1, img = Enemy.runAnim }
    instance.animation.walk = { total = 4, current = 1, img = Enemy.walkAnim }
    instance.animation.draw = instance.animation.walk.img[1]
+   instance.animation.death = { total = 13, current = 1, img = Enemy.deathAnim }
 
    instance.width = Enemy.width
    instance.height = Enemy.height
@@ -79,12 +81,22 @@ function Enemy.loadAssets()
       Enemy.walkAnim[i] = love.graphics.newImage("assets/enemy/walk/" .. i .. ".png")
    end
 
+   Enemy.deathAnim = {}
+   for i = 1, 13 do
+      Enemy.deathAnim[i] = love.graphics.newImage("assets/enemy/death/" .. i .. ".png")
+   end
+
    Enemy.width = Enemy.runAnim[1]:getWidth()
    Enemy.height = Enemy.runAnim[1]:getHeight()
 end
 
 function Enemy:update(dt)
    if self.dead then
+      return
+   end
+
+   if self.dying then
+      self:animate(dt)
       return
    end
 
@@ -110,13 +122,23 @@ function Enemy:flipDirection()
 end
 
 function Enemy:takeDamage(amount)
+   if self.dying or self.dead then
+      return
+   end
+
    self.health = self.health - amount
 
    if self.health <= 0 then
-      self.dead = true
+      self.dying = true
+      self.state = "death"
+      self.xVel = 0
+      self.speedMod = 0
+      self.animation.death.current = 1
+      self.animation.draw = self.animation.death.img[1]
 
       if self.physics and self.physics.body then
          self.physics.body:destroy()
+         self.physics.body = nil
       end
    end
 end
@@ -132,6 +154,17 @@ end
 
 function Enemy:setNewFrame()
    local anim = self.animation[self.state]
+
+   if self.state == "death" then
+      if anim.current < anim.total then
+         anim.current = anim.current + 1
+         self.animation.draw = anim.img[anim.current]
+      else
+         self.dead = true
+      end
+
+      return
+   end
 
    if anim.current < anim.total then
       anim.current = anim.current + 1
@@ -201,7 +234,7 @@ function Enemy.checkBulletHits(bullets)
       local hit = false
 
       for _, enemy in ipairs(ActiveEnemies) do
-         if not enemy.dead then
+         if not enemy.dead and not enemy.dying then
             local ex = enemy.x - enemy.width / 2
             local ey = enemy.y + enemy.offsetY - enemy.height / 2
             local ew = enemy.width

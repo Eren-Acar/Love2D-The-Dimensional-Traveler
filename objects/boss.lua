@@ -131,6 +131,12 @@ function Boss.new(x, y)
    instance.bulletDamage = 1
    instance.bullets = {}
 
+   instance.detectionRange = 300
+   instance.playerDetected = false
+   instance.attackDelay = 0.5
+   instance.attackDelayTimer = 0
+   instance.canAttack = false
+
    instance.dead = false
 
    table.insert(ActiveBosses, instance)
@@ -139,6 +145,7 @@ end
 function Boss:update(dt)
    self:updatePhase()
    self:move(dt)
+   self:updateDetection(dt)
    self:updateShoot(dt)
    self:updateBullets(dt)
    self:checkPlayerBulletHits()
@@ -174,7 +181,31 @@ function Boss:move(dt)
    end
 end
 
+function Boss:updateDetection(dt)
+   local distanceX = math.abs(Player.x - self.x)
+
+   if distanceX <= self.detectionRange then
+      self.playerDetected = true
+   else
+      self.playerDetected = false
+      self.canAttack = false
+      self.attackDelayTimer = 0
+   end
+
+   if self.playerDetected and not self.canAttack then
+      self.attackDelayTimer = self.attackDelayTimer + dt
+
+      if self.attackDelayTimer >= self.attackDelay then
+         self.canAttack = true
+      end
+   end
+end
+
 function Boss:updateShoot(dt)
+   if not self.canAttack then
+      return
+   end
+
    self.shootTimer = self.shootTimer - dt
 
    if self.shootTimer <= 0 then

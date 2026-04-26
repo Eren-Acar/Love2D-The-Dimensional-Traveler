@@ -137,6 +137,13 @@ function Boss.new(x, y)
    instance.attackDelayTimer = 0
    instance.canAttack = false
 
+   instance.color = {
+      red = 1,
+      green = 1,
+      blue = 1,
+      speed = 2
+   }
+
    instance.dead = false
 
    table.insert(ActiveBosses, instance)
@@ -150,6 +157,7 @@ function Boss:update(dt)
    self:updateBullets(dt)
    self:checkPlayerBulletHits()
    self:checkPlayerContact()
+   self:unTint(dt)
 end
 
 function Boss:updatePhase()
@@ -255,6 +263,7 @@ function Boss:checkPlayerBulletHits()
       local bossY = self.y - self.height / 2
 
       if checkCollision(bx, by, bw, bh, bossX, bossY, self.width, self.height) then
+         self:tintRed()
          self.health = self.health - 1
          table.remove(Player.bullets, i)
 
@@ -283,7 +292,8 @@ function Boss:checkPlayerContact()
 end
 
 function Boss:draw()
-   love.graphics.setColor(1, 1, 1, 1)
+   love.graphics.setColor(self.color.red, self.color.green, self.color.blue)
+   -- love.graphics.setColor(1, 1, 1, 1)
 
    love.graphics.draw(
         self.sprite,
@@ -328,6 +338,17 @@ function Boss.drawAll()
    for _, boss in ipairs(ActiveBosses) do
       boss:draw()
    end
+end
+
+function Boss:tintRed()
+   self.color.green = 0
+   self.color.blue = 0
+end
+
+function Boss:unTint(dt)
+   self.color.red = math.min(self.color.red + self.color.speed * dt, 2)
+   self.color.green = math.min(self.color.green + self.color.speed * dt, 1)
+   self.color.blue = math.min(self.color.blue + self.color.speed * dt, 1)
 end
 
 return Boss

@@ -42,6 +42,7 @@ function Enemy.new(x, y)
    instance.health = 3
    instance.dead = false
    instance.dying = false
+   instance.facing = 1
 
    instance.state = "walk"
 
@@ -53,6 +54,13 @@ function Enemy.new(x, y)
 
    instance.width = Enemy.width
    instance.height = Enemy.height
+
+   instance.color = {
+      red = 1,
+      green = 1,
+      blue = 1,
+      speed = 3
+   }
 
    instance.physics = {}
    instance.physics.body = love.physics.newBody(World, instance.x, instance.y, "dynamic")
@@ -95,6 +103,8 @@ function Enemy:update(dt)
       return
    end
 
+   self:unTint(dt)
+
    if self.dying then
       self:animate(dt)
       return
@@ -125,6 +135,8 @@ function Enemy:takeDamage(amount)
    if self.dying or self.dead then
       return
    end
+
+   self:tintRed()
 
    self.health = self.health - amount
 
@@ -182,6 +194,12 @@ function Enemy:syncPhysics()
    self.x, self.y = self.physics.body:getPosition()
 
    self.physics.body:setLinearVelocity(self.xVel * self.speedMod, 0)
+
+   if self.xVel < 0 then
+      self.facing = -1
+   else
+      self.facing = 1
+   end
 end
 
 function Enemy:draw()
@@ -189,11 +207,9 @@ function Enemy:draw()
       return
    end
 
-   local scaleX = 1
+   local scaleX = self.facing
 
-   if self.xVel < 0 then
-      scaleX = -1
-   end
+   love.graphics.setColor(self.color.red, self.color.green, self.color.blue)
 
    love.graphics.draw(
       self.animation.draw,
@@ -205,6 +221,8 @@ function Enemy:draw()
       self.width / 2,
       self.height / 2
    )
+
+   love.graphics.setColor(1, 1, 1, 1)
 end
 
 function Enemy.updateAll(dt)
@@ -292,6 +310,17 @@ function Enemy.beginContact(a, b, collision)
          end
       end
    end
+end
+
+function Enemy:tintRed()
+   self.color.green = 0
+   self.color.blue = 0
+end
+
+function Enemy:unTint(dt)
+   self.color.red = math.min(self.color.red + self.color.speed * dt, 1)
+   self.color.green = math.min(self.color.green + self.color.speed * dt, 1)
+   self.color.blue = math.min(self.color.blue + self.color.speed * dt, 1)
 end
 
 return Enemy

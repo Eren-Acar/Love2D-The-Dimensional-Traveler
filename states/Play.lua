@@ -32,7 +32,7 @@ function Play:enter(params)
     params = params or {}
 
     if self.music == nil then
-        Audio:playMusic("assets/sfx/Hydrogen.ogg")
+        Audio:playMusic("assets/sfx/main_theme.wav")
     end
 
     self.timer = params.time or 0

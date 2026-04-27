@@ -346,7 +346,7 @@ function Boss:tintRed()
 end
 
 function Boss:unTint(dt)
-   self.color.red = math.min(self.color.red + self.color.speed * dt, 2)
+   self.color.red = math.min(self.color.red + self.color.speed * dt, 1)
    self.color.green = math.min(self.color.green + self.color.speed * dt, 1)
    self.color.blue = math.min(self.color.blue + self.color.speed * dt, 1)
 end

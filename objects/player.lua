@@ -74,12 +74,12 @@ function Player:loadAssets()
       self.animation.run.img[i] = love.graphics.newImage("assets/player/run/" .. i .. ".png")
    end
 
-   self.animation.idle = { total = 7, current = 1, img = {} }
+   self.animation.idle = { total = 8, current = 1, img = {} }
    for i = 1, self.animation.idle.total do
       self.animation.idle.img[i] = love.graphics.newImage("assets/player/idle/" .. i .. ".png")
    end
 
-   self.animation.air = { total = 4, current = 1, img = {} }
+   self.animation.air = { total = 5, current = 1, img = {} }
    for i = 1, self.animation.air.total do
       self.animation.air.img[i] = love.graphics.newImage("assets/player/air/" .. i .. ".png")
    end

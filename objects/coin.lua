@@ -1,5 +1,3 @@
-
-
 local Coin = {}
 Coin.__index = Coin
 local ActiveCoins = {}

@@ -26,4 +26,25 @@ function Audio:playSfx(path)
     sfx:play()
 end
 
+function Audio:load()
+    love.audio.setEffect("pause_muffle", {
+        type = "equalizer",
+        
+        lowgain = 1.2,
+        highgain = 0.2
+    })
+end
+
+function Audio:setPausedMuffle(enabled)
+    if not self.music then return end
+
+    if enabled then
+        self.music:setVolume(Settings.musicVolume * 0.2)
+        self.sfxMultiplier = 0.3
+    else
+        self.music:setVolume(Settings.musicVolume)
+        self.sfxMultiplier = 1
+    end
+end
+
 return Audio

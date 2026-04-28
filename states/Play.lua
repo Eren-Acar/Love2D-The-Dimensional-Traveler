@@ -16,6 +16,10 @@ local Win = require("states.Win")
 
 local Play = {}
 
+local function getPauseState()
+    return require("states.Pause")
+end
+
 local function beginContact(a, b, collision)
     if Coin.beginContact(a, b, collision) then return end
     if Spike.beginContact(a, b, collision) then return end
@@ -28,28 +32,107 @@ local function endContact(a, b, collision)
     Player:endContact(a, b, collision)
 end
 
-function Play:enter(params)
-    params = params or {}
-
+function Play:loadMusic()
     if self.music == nil then
         Audio:playMusic("assets/sfx/main_theme.wav")
     end
+end
 
-    self.timer = params.time or 0
-
+function Play:loadLevel(params)
     Enemy.loadAssets()
     Map:load(params.level)
-
     World:setCallbacks(beginContact, endContact)
+end
 
-    self.paused = false
-    self.gameEnded = false
-
-    GUI:load()
+function Play:loadPlayer(params)
     Player:load()
     Player.coins = params.coins or 0
+end
 
+function Play:loadUI()
+    GUI:load()
     self.font = love.graphics.newFont("assets/bit.ttf", 16)
+end
+
+function Play:resetState(params)
+    self.timer = params.time or 0
+    self.paused = false
+    self.gameEnded = false
+end
+
+
+function Play:enter(params)
+    params = params or {}
+
+    self:loadMusic()
+    self:resetState(params)
+    self:loadLevel(params)
+    self:loadUI()
+    self:loadPlayer(params)
+end
+
+function Play:updateTimer(dt)
+    self.timer = self.timer + dt
+    GUI.time = self.timer
+end
+
+function Play:updateWorld(dt)
+    Audio:updateVolumes()
+    World:update(dt)
+end
+
+function Play:updateEntities(dt)
+    Player:update(dt)
+    Enemy.checkBulletHits(Player.bullets)
+
+    Boss.updateAll(dt)
+    Coin.updateAll(dt)
+    Spike.updateAll(dt)
+    DeadZone.updateAll(dt)
+    Enemy.updateAll(dt)
+end
+
+function Play:updateSystems(dt)
+    GUI:update(dt)
+    Camera:setPosition(Player.x, Player.y)
+    Map:update()
+end
+
+function Play:goToGameOver()
+    self.gameEnded = true
+
+    Gamestate.switch(GameOver, {
+        coins = Player.coins,
+        level = Map.currentLevel,
+        time = self.timer
+    })
+end
+
+function Play:goToWin()
+    Boss.defeated = false
+
+    Gamestate.switch(Win, {
+        coins = Player.coins,
+        time = self.timer
+    })
+end
+
+function Play:checkGameOver()
+    if Player.dead and not self.gameEnded then
+        self:goToGameOver()
+        return true
+    end
+
+    return false
+end
+
+function Play:checkLevelCompleted()
+    if Map.completed or Boss.defeated then
+        self:goToWin()
+        return true
+    end
+
+    return false
 end
 
 function Play:update(dt)
@@ -57,46 +140,13 @@ function Play:update(dt)
         return
     end
 
-    self.timer = self.timer + dt
-    GUI.time = self.timer
+    self:updateTimer(dt)
+    self:updateWorld(dt)
+    self:updateEntities(dt)
+    self:updateSystems(dt)
 
-    Audio:updateVolumes()
-
-    World:update(dt)
-
-    Player:update(dt)
-    Enemy.checkBulletHits(Player.bullets)
-    Boss.updateAll(dt)
-
-    Coin.updateAll(dt)
-    Spike.updateAll(dt)
-    DeadZone.updateAll(dt)
-
-    Enemy.updateAll(dt)
-    GUI:update(dt)
-    Camera:setPosition(Player.x, Player.y)
-    Map:update()
-
-    if Player.dead and not self.gameEnded then
-        self.gameEnded = true
-        Gamestate.switch(GameOver, {
-    coins = Player.coins,
-    level = Map.currentLevel,
-    time = self.timer
-})
-        return
-    end
-
-    if Map.completed or Boss.defeated then
-        Boss.defeated = false
-
-        Gamestate.switch(Win, {
-            coins = Player.coins,
-            time = self.timer
-        })
-
-        return
-    end
+    if self:checkGameOver() then return end
+    if self:checkLevelCompleted() then return end
 end
 
 function Play:drawParallax()
@@ -127,11 +177,7 @@ function Play:drawParallax()
     end
 end
 
-function Play:draw()
-    Map:draw()
-
-    Camera:apply()
-
+function Play:drawTutorial()
     if Map.currentLevel == 1 then
         love.graphics.setFont(self.font)
         love.graphics.print(
@@ -140,40 +186,70 @@ function Play:draw()
             141.6
         )
     end
-    
+end
+
+function Play:drawWorld()
+    Map:draw()
+
+    Camera:apply()
+
+    self:drawTutorial()
+
     Player:draw()
     Enemy.drawAll()
     Boss.drawAll()
     Coin.drawAll()
     Spike.drawAll()
+
     Camera:clear()
+end
 
-    GUI:draw()
-
-    if self.paused then
-        local Pause = require("states.Pause")
-        Pause:draw()
+function Play:drawPause()
+    if not self.paused then
+        return
     end
+
+    local Pause = getPauseState()
+    Pause:draw()
+end
+
+function Play:draw()
+    self:drawWorld()
+    GUI:draw()
+    self:drawPause()
+end
+
+function Play:pauseGame()
+    self.paused = true
+    Audio:setPausedMuffle(true)
+
+    local Pause = getPauseState()
+    Pause:enter()
+end
+
+function Play:resumeGame()
+    self.paused = false
+    Audio:setPausedMuffle(false)
+end
+
+function Play:handlePausedInput(key)
+    if key == "escape" then
+        self:resumeGame()
+        return
+    end
+
+    local Pause = getPauseState()
+    Pause:keypressed(key, self)
 end
 
 function Play:keypressed(key)
     if self.paused then
-        local Pause = require("states.Pause")
-
-        if key == "escape" then
-            self.paused = false
-            return
-        end
-
-        Pause:keypressed(key, self)
+        self:handlePausedInput(key)
         return
     end
 
     if key == "escape" then
-        self.paused = true
-
-        local Pause = require("states.Pause")
-        Pause:enter()
+        self:pauseGame()
         return
     end
 
@@ -185,7 +261,7 @@ function Play:mousepressed(x, y, button)
         return
     end
 
-    if button == 1 then 
+    if button == 1 then
         Player:shoot()
     end
 end

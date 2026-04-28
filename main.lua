@@ -1,9 +1,11 @@
 local Gamestate = require("lib.hump.gamestate")
 
 local Menu = require("states.Menu")
+local Audio = require("objects.Audio")
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Audio:load()
     Gamestate.switch(Menu)
 end
 

@@ -293,7 +293,6 @@ end
 
 function Boss:draw()
    love.graphics.setColor(self.color.red, self.color.green, self.color.blue)
-   -- love.graphics.setColor(1, 1, 1, 1)
 
    love.graphics.draw(
         self.sprite,

@@ -3,11 +3,16 @@ local Play = require("states.Play")
 local Menu = require("states.Menu")
 local Settings = require("objects.Settings")
 local Audio = require("objects.Audio")
+local Camera = require("objects.Camera")
 
 local Pause = {}
 
 function Pause:enter()
-    self.bg = love.graphics.newImage("assets/backgrounds/background.png")
+    self.backgroundLayers = {
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer1.png"),
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer2.png"),
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer3.png")
+    }
     self.selected = 1
 
     self.buttons = {
@@ -19,8 +24,35 @@ function Pause:enter()
     self.settingsMode = false
 end
 
+function Pause:drawParallax()
+    love.graphics.origin()
+
+    local screenW = love.graphics.getWidth()
+    local screenH = love.graphics.getHeight()
+
+    for i, img in ipairs(self.backgroundLayers) do
+        local scale = math.max(
+            screenW / img:getWidth(),
+            screenH / img:getHeight()
+        )
+
+        local imgW = img:getWidth() * scale
+        local speed = i / #self.backgroundLayers
+
+        local x = 0
+
+        if Camera then
+            x = -(Camera.x * speed) % imgW
+        end
+
+        love.graphics.draw(img, x, -175, 0, scale, scale)
+        love.graphics.draw(img, x - imgW, 0, 0, scale, scale)
+        love.graphics.draw(img, x + imgW, 0, 0, scale, scale)
+    end
+end
+
 function Pause:draw()
-    love.graphics.draw(self.bg, 0, 0)
+    self:drawParallax()
 
     love.graphics.printf("PAUSED", 0, 140, love.graphics.getWidth(), "center")
 

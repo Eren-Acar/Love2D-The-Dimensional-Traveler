@@ -2,6 +2,7 @@ local Gamestate = require("lib.hump.gamestate")
 local Play = require("states.Play")
 local Settings = require("objects.Settings")
 local Audio = require("objects.Audio")
+local Camera = require("objects.Camera")
 
 local Menu = {}
 
@@ -9,7 +10,11 @@ function Menu:enter()
     self.mode = "menu"
     self.selected = 1
     self.font = love.graphics.newFont("assets/bit.ttf", 36)
-    self.bg = love.graphics.newImage("assets/backgrounds/background.png")
+    self.backgroundLayers = {
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer1.png"),
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer2.png"),
+        love.graphics.newImage("assets/backgrounds/menu_backgrounds/layer3.png")
+    }
 
     self.buttons = {
         "New Game",
@@ -26,6 +31,33 @@ function Menu:enter()
         "Back to Menu"
     }
 
+end
+
+function Menu:drawParallax()
+    love.graphics.origin()
+
+    local screenW = love.graphics.getWidth()
+    local screenH = love.graphics.getHeight()
+
+    for i, img in ipairs(self.backgroundLayers) do
+        local scale = math.max(
+            screenW / img:getWidth(),
+            screenH / img:getHeight()
+        )
+
+        local imgW = img:getWidth() * scale
+        local speed = i / #self.backgroundLayers
+
+        local x = 0
+
+        if Camera then
+            x = -(Camera.x * speed) % imgW
+        end
+
+        love.graphics.draw(img, x, -175, 0, scale, scale)
+        love.graphics.draw(img, x - imgW, 0, 0, scale, scale)
+        love.graphics.draw(img, x + imgW, 0, 0, scale, scale)
+    end
 end
 
 function Menu:loadScores()
@@ -56,7 +88,7 @@ function Menu:loadScores()
 end
 
 function Menu:draw()
-    love.graphics.draw(self.bg, 0, 0)
+    self:drawParallax()
 
     love.graphics.setFont(self.font)
     love.graphics.printf("THE DIMENSIONAL TRAVELER", 0, 120, love.graphics.getWidth(), "center")

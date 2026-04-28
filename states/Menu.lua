@@ -82,7 +82,9 @@ function Menu:draw()
             love.graphics.printf("No scores yet.", 0, 260, love.graphics.getWidth(), "center")
         else
             local maxScores = math.min(5, #self.scores)
-            for i, score in ipairs(self.scores) do
+
+            for i = 1, maxScores do
+                local score = self.scores[i]
                 local minutes = math.floor(score.time / 60)
                 local seconds = score.time % 60
 

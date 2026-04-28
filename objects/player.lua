@@ -64,6 +64,9 @@ function Player:load()
    self.sounds = {}
    self.sounds.jump = love.audio.newSource("assets/sfx/jump.wav", "static")
    self.sounds.hit = love.audio.newSource("assets/sfx/hit.wav", "static")
+
+   self.damageCooldown = 0.66
+   self.damageTimer = 0
 end
 
 function Player:loadAssets()
@@ -97,6 +100,12 @@ function Player:loadAssets()
 end
 
 function Player:takeDamage(amount)
+   if self.damageTimer > 0 then
+      return
+   end
+
+   self.damageTimer = self.damageCooldown
+
    self:tintRed()
 
    if self.health.current - amount > 0 then
@@ -105,8 +114,19 @@ function Player:takeDamage(amount)
       self.health.current = 0
       self:die()
    end
+
    self.sounds.hit:stop()
    self.sounds.hit:play()
+end
+
+function Player:updateDamageTimer(dt)
+   if self.damageTimer > 0 then
+      self.damageTimer = self.damageTimer - dt
+
+      if self.damageTimer < 0 then
+         self.damageTimer = 0
+      end
+   end
 end
 
 function Player:die()
@@ -144,6 +164,7 @@ function Player:update(dt)
    self:applyGravity(dt)
    self:updateShootTimer(dt)
    self:updateBullets(dt)
+   self:updateDamageTimer(dt)
 end
 
 function Player:updateShootTimer(dt)

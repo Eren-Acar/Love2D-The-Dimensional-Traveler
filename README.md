@@ -2,12 +2,12 @@
 
 The Dimensional Traveler is a simple two-scene 2D action-platform game made with Löve2D for the midterm of COMP 411 - Introduction to Game Programming.
 
-# Licence
-All source code was created by me. You are fully free to use or modify the code as you wish. However, there may be different licensing conditions for the assets that I used. All assets are open source, but they may have restrictions for commercial or other use. Please consider this before using these assets. I have listed all the assets I used at the end.
-
 <img width="1594" height="937" alt="Dimensional Traveler-1" src="https://github.com/user-attachments/assets/ff0031c7-4bbd-4d64-b768-eeee6910b9ae" />
 <img width="1594" height="937" alt="Dimensional Traveler-2" src="https://github.com/user-attachments/assets/e69dcef2-bee3-4564-bad1-d2ea34f2d370" />
 <img width="1594" height="937" alt="Dimensional Traveler-3" src="https://github.com/user-attachments/assets/877f7632-924e-42cc-8247-52e0d19067c7" />
+
+# Licence
+All source code was created by me. You are fully free to use or modify the code as you wish. However, there may be different licensing conditions for the assets that I used. All assets are open source, but they may have restrictions for commercial or other use. Please consider this before using these assets. I have listed all the assets I used at the end.
 
 # Asset List
 Thank you to all the asset creators.

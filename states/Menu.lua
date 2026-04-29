@@ -7,6 +7,9 @@ local Camera = require("objects.Camera")
 local Menu = {}
 
 function Menu:enter()
+    Camera.x = 0
+    Camera.y = 0
+    
     self.mode = "menu"
     self.selected = 1
     self.font = love.graphics.newFont("assets/bit.ttf", 36)

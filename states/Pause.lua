@@ -30,6 +30,8 @@ function Pause:drawParallax()
     local screenW = love.graphics.getWidth()
     local screenH = love.graphics.getHeight()
 
+    local yOffset = -175
+
     for i, img in ipairs(self.backgroundLayers) do
         local scale = math.max(
             screenW / img:getWidth(),
@@ -39,15 +41,16 @@ function Pause:drawParallax()
         local imgW = img:getWidth() * scale
         local speed = i / #self.backgroundLayers
 
-        local x = 0
-
-        if Camera then
-            x = -(Camera.x * speed) % imgW
+        local cameraX = 0
+        if Camera and Camera.x then
+            cameraX = Camera.x
         end
 
-        love.graphics.draw(img, x, -175, 0, scale, scale)
-        love.graphics.draw(img, x - imgW, 0, 0, scale, scale)
-        love.graphics.draw(img, x + imgW, 0, 0, scale, scale)
+        local x = -(cameraX * speed) % imgW
+
+        love.graphics.draw(img, x - imgW, yOffset, 0, scale, scale)
+        love.graphics.draw(img, x, yOffset, 0, scale, scale)
+        love.graphics.draw(img, x + imgW, yOffset, 0, scale, scale)
     end
 end
 

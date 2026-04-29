@@ -60,8 +60,7 @@ function Map:loadBackground()
          love.graphics.newImage("assets/backgrounds/cave/cave4.png"),
          love.graphics.newImage("assets/backgrounds/cave/cave3.png"),
          love.graphics.newImage("assets/backgrounds/cave/cave2.png"),
-         love.graphics.newImage("assets/backgrounds/cave/cave1.png"),
-         love.graphics.newImage("assets/backgrounds/cave/cave0.png")
+         love.graphics.newImage("assets/backgrounds/cave/cave1.png")
       }
    end
 end

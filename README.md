@@ -18,5 +18,6 @@ Thank you to all the asset creators.
 - Cavern TileSet: https://draconimous.itch.io/cavern-set
 - Pixel Art Woods Tileset: https://karsiori.itch.io/woods-tileset-and-background
 - Archer: https://kbpixelart.itch.io/ninja-enemy-pack
-- Sound/Music: https://opengameart.org/content/5-chiptunes-action
+- SFX: https://opengameart.org/content/5-chiptunes-action
+- Music: [Uğur Pişkin](https://www.linkedin.com/in/u%C4%9Fur-pi%C5%9Fkin-a15617336) 
 - Menu Background: https://szadiart.itch.io/background-desert-mountains

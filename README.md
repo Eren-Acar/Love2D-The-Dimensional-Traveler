@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/c6f34683-7478-4891-832d-4f121b712d7c
 All source code was created by me. You are fully free to use or modify the code as you wish. However, there may be different licensing conditions for the assets that I used. All assets are open source, but they may have restrictions for commercial or other use. Please consider this before using these assets. I have listed all the assets I used at the end.
 
 # Asset List
-Thank you to all the asset creators.
+Thanks to all the asset creators.
 
 - Mecha-Stone Golem: https://darkpixel-kronovi.itch.io/mecha-golem-free
 - Parallax Backgrounds: Caves: https://admurin.itch.io/parallax-backgrounds-caves?download
